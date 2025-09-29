@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class InteractableObject : MonoBehaviour
 {
@@ -34,25 +35,6 @@ public class InteractableObject : MonoBehaviour
         InteractPopup.SetActive(true);
         incollision = true;
         playertag = collision.gameObject.tag;
-    }
-
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        print("1");
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            print("ok");
-            if (collision.gameObject.CompareTag("Player"))
-            {
-                TextInteractionManager.ActivateTypewriter(HumanString);
-                InteractPopup.SetActive(false);
-            }
-            else
-            {
-                TextInteractionManager.ActivateTypewriter(ApparitionString);
-                InteractPopup.SetActive(false);
-            }
-        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
