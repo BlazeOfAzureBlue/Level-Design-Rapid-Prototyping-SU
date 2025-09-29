@@ -2,6 +2,7 @@ using Unity.VisualScripting;
 using UnityEditor.MemoryProfiler;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using static UnityEngine.Rendering.DebugUI;
 
 public class PlayerManager : MonoBehaviour
@@ -11,6 +12,9 @@ public class PlayerManager : MonoBehaviour
     public float speed = 5f;
     public LayerMask groundLayer;
     public float groundCheckRadius = 1.5f;
+
+    public bool LevitationAcquired = false;
+    public bool AscensionAcquired = false;
 
     [Header("put the different stupid stuff in here so the code knows what you're talking to")]
     public GameObject apparition;
@@ -30,19 +34,71 @@ public class PlayerManager : MonoBehaviour
     private bool isGrounded;
     private float playerMovement;
     private bool appartionActive;
+    private bool abletoLevitate = false;
 
+    private float LevitationTime = 5.0f;
+    private float AscendTime = 3.0f;
+    private bool isLevitating = false;
+    private bool isAscending = false;
+
+
+
+    private IEnumerator Levitation()
+    {
+        yield return new WaitForSeconds(0.5f);
+        abletoLevitate = true;
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
     }
 
+    public void ResetApparition()
+    {
+        apparition.SetActive(false);
+        apparitionCamera.SetActive(false);
+
+        mainCamera.SetActive(true);
+        appartionActive = false;
+        panel.color = new Color(0, 0, 0, 0);
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if(appartionActive)
+
+        if (appartionActive)
         {
             isGrounded = Physics2D.OverlapCircle(ApparitiongroundCheck.position, groundCheckRadius, groundLayer); /// ooooo is the ghost grounded ooooooo
+            if (isGrounded)
+            {
+                abletoLevitate = false;
+                LevitationTime = 5.0f;
+                AscendTime = 3.0f;
+            }
+            if (Input.GetButton("Jump") && !isGrounded && abletoLevitate && LevitationTime > 0 && isAscending == false && LevitationAcquired == true)
+            {
+                apparitionRigidBody.linearVelocity = new Vector2(apparitionRigidBody.linearVelocityX, 0f);
+                LevitationTime = LevitationTime - Time.deltaTime;
+                isLevitating = true;
+            } // LEVITATE! LEVITATE! LEVITATE!
+
+            if (Input.GetButton("Ascend") && isLevitating == false && AscendTime > 0 && AscensionAcquired == true)
+            {
+                apparitionRigidBody.linearVelocity = new Vector2(apparitionRigidBody.linearVelocityX, 7.5f);
+                AscendTime = AscendTime - Time.deltaTime;
+                isAscending = true;
+            } // ASCEND! ASCEND! ASCEND!
+
+            if (!Input.GetButton("Jump"))
+            {
+                isLevitating = false;
+            }
+            if (!Input.GetButton("Ascend"))
+            {
+                isAscending = false;
+            } // player stopped doing anything cool :( BOOOOOOOOOOOOOO
         }
         else
         {
@@ -53,12 +109,7 @@ public class PlayerManager : MonoBehaviour
         {
             if(appartionActive)
             {
-                apparition.SetActive(false);
-                apparitionCamera.SetActive(false);
-
-                mainCamera.SetActive(true);
-                appartionActive = false;
-                panel.color = new Color(0, 0, 0, 0);
+                ResetApparition();
             }
             else
             {
@@ -78,6 +129,7 @@ public class PlayerManager : MonoBehaviour
             if(appartionActive)
             {
                 apparitionRigidBody.linearVelocity = new Vector2(apparitionRigidBody.linearVelocityX, 9f);
+                StartCoroutine(Levitation());
             }
             else
             {
@@ -85,7 +137,9 @@ public class PlayerManager : MonoBehaviour
             }
         }
 
-        if(appartionActive && Vector2.Distance(apparition.transform.position, mainCharacter.transform.position) > 0)
+           
+
+        if (appartionActive && Vector2.Distance(apparition.transform.position, mainCharacter.transform.position) > 0)
         {
             float distance = 50 - Vector2.Distance(apparition.transform.position, mainCharacter.transform.position);
             float alpha = 1f - Mathf.Clamp01(distance / 50); // calculate the alpha teehee
@@ -93,7 +147,7 @@ public class PlayerManager : MonoBehaviour
 
             panel.color = new Color(0, 0, 0, alpha);
 
-            if(distance <= 0)
+            if (distance <= 0)
             {
                 appartionActive = false;
                 apparition.SetActive(false);
@@ -118,5 +172,6 @@ public class PlayerManager : MonoBehaviour
             mainRigidBody.linearVelocity = new Vector2(playerMovement * speed, mainRigidBody.linearVelocityY);
         }
     }
-
 }
+
+
