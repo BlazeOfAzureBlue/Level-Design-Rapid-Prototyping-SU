@@ -26,7 +26,9 @@ public class PlayerManager : MonoBehaviour
     public GameObject apparitionCamera; // have a separate camera for both of them 
 
     public Transform groundCheck;
-    public Transform ApparitiongroundCheck; 
+    public Transform ApparitiongroundCheck;
+
+    public bool GhostRoom;
 
     public Image panel;
 
@@ -117,6 +119,7 @@ public class PlayerManager : MonoBehaviour
                 apparition.SetActive(true);
                
                 apparition.transform.position = mainCharacter.transform.position;
+                mainRigidBody.linearVelocity = new Vector2(0, 0);
                 apparitionCamera.SetActive(true);
 
                 mainCamera.SetActive(false);
@@ -139,7 +142,7 @@ public class PlayerManager : MonoBehaviour
 
            
 
-        if (appartionActive && Vector2.Distance(apparition.transform.position, mainCharacter.transform.position) > 0)
+        if (appartionActive && Vector2.Distance(apparition.transform.position, mainCharacter.transform.position) > 0 && GhostRoom == false)
         {
             float distance = 50 - Vector2.Distance(apparition.transform.position, mainCharacter.transform.position);
             float alpha = 1f - Mathf.Clamp01(distance / 50); // calculate the alpha teehee
